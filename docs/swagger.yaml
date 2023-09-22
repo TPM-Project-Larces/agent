@@ -1,0 +1,52 @@
+info:
+  contact: {}
+paths:
+  /decrypt_file:
+    post:
+      consumes:
+      - application/json
+      description: decrypt an encrypted file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      tags:
+      - User operations
+  /generate_keys:
+    post:
+      consumes:
+      - application/json
+      description: generat a pair of keys
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      tags:
+      - User operations
+  /upload_file:
+    post:
+      consumes:
+      - multipart/form-data
+      description: upload a file to encrypt
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      tags:
+      - User operations
+swagger: "2.0"
