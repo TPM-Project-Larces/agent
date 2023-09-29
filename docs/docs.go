@@ -63,13 +63,22 @@ const docTemplate = `{
             "post": {
                 "description": "upload a file to encrypt",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "User operations"
+                ],
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
                 ],
                 "responses": {
                     "200": {

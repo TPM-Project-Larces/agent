@@ -32,8 +32,14 @@ paths:
   /upload_file:
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: upload a file to encrypt
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
       produces:
       - application/json
       responses:

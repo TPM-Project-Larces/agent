@@ -8,6 +8,7 @@ default: run-with-docs
 run:
 	@go run main.go
 run-with-docs:
+	@go mod tidy
 	@swag init
 	@go run main.go
 build:

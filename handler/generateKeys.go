@@ -1,16 +1,14 @@
 package handler
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/go-tpm/legacy/tpm2"
 )
 
 // @BasePath /
@@ -21,44 +19,68 @@ import (
 // @Tags User operations
 // @Accept json
 // @Produce json
-// @Success 200 {string} Helloworld
+// @Success 200 {string} Keys_generated
 // @Router /generate_keys [post]
 func GenerateKeys(ctx *gin.Context) {
-	// Gerar um par de chaves RSA
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		fmt.Println("Erro ao gerar a chave privada:", err)
+
+	// Open the TPM device.
+	tpmDevice := "/dev/tpmrm0"
+	tpm, err := tpm2.OpenTPM(tpmDevice)
+	handleError("Error opening TPM device", err)
+	defer tpm.Close()
+
+	// Creates primary key template
+	keyTemplate := tpm2.Public{
+		Type:       tpm2.AlgRSA,
+		NameAlg:    tpm2.AlgSHA256,
+		Attributes: tpm2.FlagFixedParent | tpm2.FlagFixedTPM | tpm2.FlagSensitiveDataOrigin | tpm2.FlagUserWithAuth | tpm2.FlagDecrypt,
+		AuthPolicy: nil,
+		RSAParameters: &tpm2.RSAParams{
+			KeyBits:    2048,
+			ModulusRaw: make([]byte, 256),
+		},
+	}
+
+	// Creates the primary key in the TPM.
+	keyHandle, outPublic, err := tpm2.CreatePrimary(tpm, tpm2.HandleOwner, tpm2.PCRSelection{}, "", "", keyTemplate)
+	handleError("Error creating primary key", err)
+	defer tpm2.FlushContext(tpm, keyHandle)
+
+	// Read key public part
+	//fmt.Println(tpm2.ReadPublic(tpm, keyHandle))
+	//fmt.Println("\nPublic part: \n", outPublic)
+
+	// Converts outPublic type to bytes
+	publicKey, err := x509.MarshalPKIXPublicKey(outPublic)
+	handleError("Error marshaling primary key", err)
+
+	// Creates block public key
+	blockPublicKey := &pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: publicKey,
+	}
+
+	filePath := "./key/public_key.pem"
+
+	dir := filepath.Dir(filePath)
+
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		handleError("Error creating directory", err)
+		ctx.JSON(http.StatusInternalServerError, "Error creating directory")
 		return
 	}
 
-	// Codificar a chave pública em formato PEM
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
+	filePublicKey, err := os.Create(filePath)
 	if err != nil {
-		fmt.Println("Erro ao codificar a chave pública em formato PEM:", err)
+		handleError("Error creating file public key in PEM format", err)
+		ctx.JSON(http.StatusInternalServerError, "Error creating public key file")
 		return
 	}
+	defer filePublicKey.Close()
 
-	encodedPub := pem.EncodeToMemory(&pem.Block{
-		Type:  "RSA PUBLIC KEY",
-		Bytes: publicKeyBytes,
-	})
+	// Loads public key in file
+	err = pem.Encode(filePublicKey, blockPublicKey)
+	handleError("Error enconding block public key in PEM file", err)
 
-	if err := ioutil.WriteFile("public_key.pem", encodedPub, 0600); err != nil {
-		log.Fatalf("failed to write PEM data to file: %v", err)
-	}
-
-	// Codificar a chave privada em formato PEM
-	privateKeyBytes := x509.MarshalPKCS1PrivateKey(privateKey)
-
-	encodedPriv := pem.EncodeToMemory(&pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: privateKeyBytes,
-	})
-
-	if err := ioutil.WriteFile("private_key.pem", encodedPriv, 0600); err != nil {
-		log.Fatalf("failed to write PEM data to file: %v", err)
-	}
-
-	ctx.JSON(http.StatusOK, LerArquivo("public_key.pem"))
-
+	ctx.JSON(http.StatusOK, "keys_generated")
 }
