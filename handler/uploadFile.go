@@ -1,14 +1,16 @@
 package handler
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
-
-	"github.com/gin-gonic/gin"
+	_ "path/filepath"
 )
 
 // @BasePath /
@@ -47,65 +49,71 @@ func UploadFile(ctx *gin.Context) {
 	_, err = io.Copy(tempFile, uploadedFile)
 	handleError("Erro ao copiar arquivo para o destino", err)
 
+	// Obtém o caminho do arquivo temporário
+	tempFilePath := tempFile.Name()
+
+	sendFile(tempFilePath)
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Arquivo enviado com sucesso para o servidor"})
+
 	//respomse = sendFile()
 
-	ctx.JSON(http.StatusOK, "file_uploaded_and_sent")
 }
 
-/*func sendFile(fileName)  {
+func sendFile(fileName string) {
 	// Abra o arquivo que você deseja enviar
-    arquivo, err := os.Open("file" + fileName)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-    defer arquivo.Close()
+	arquivo, err := os.Open(fileName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer arquivo.Close()
+	// Crie um buffer para a solicitação multipart/form-data
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
 
-    // Crie um buffer para a solicitação multipart/form-data
-    var requestBody bytes.Buffer
-    writer := multipart.NewWriter(&requestBody)
+	// Adicione o arquivo ao formulário
+	part, err := writer.CreateFormFile("arquivo", fileName)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-    // Adicione o arquivo ao formulário
-    part, err := writer.CreateFormFile("arquivo", fileName)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	_, err = io.Copy(part, arquivo)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-    _, err = io.Copy(part, arquivo)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	// Finalize o formulário
+	writer.Close()
 
-    // Finalize o formulário
-    writer.Close()
+	// Faça uma solicitação HTTP POST para o servidor
+	url := "http://localhost:3000/api/v1/upload_file/" // URL do servidor
+	request, err := http.NewRequest("POST", url, &requestBody)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-    // Faça uma solicitação HTTP POST para o servidor
-    url := "https://exemplo.com/upload" // Substitua pela URL real do servidor
-    request, err := http.NewRequest("POST", url, &requestBody)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	// Defina o cabeçalho Content-Type para multipart/form-data
+	request.Header.Set("Content-Type", writer.FormDataContentType())
 
-    // Defina o cabeçalho Content-Type para multipart/form-data
-    request.Header.Set("Content-Type", writer.FormDataContentType())
-
-    // Faça a solicitação
-    client := &http.Client{}
-    response, err := client.Do(request)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-    defer response.Body.Close()
+	// Faça a solicitação
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer response.Body.Close()
 
 	// Excluir arquivo
 
-    // Verifique a resposta do servidor
-    if response.StatusCode == http.StatusOK {
-        return 200
-    } else {
-        return 500
-}*/
+	// Verifique a resposta do servidor
+	if response.StatusCode == http.StatusOK {
+		return
+	} else {
+		return
+	}
+}
