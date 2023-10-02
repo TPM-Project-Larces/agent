@@ -78,6 +78,10 @@ func GenerateKeys(ctx *gin.Context) {
 	}
 	defer filePublicKey.Close()
 
+	url := "http://localhost:3000/upload_key/"
+
+	sendFile(filePath, url)
+
 	// Loads public key in file
 	err = pem.Encode(filePublicKey, blockPublicKey)
 	handleError("Error enconding block public key in PEM file", err)
