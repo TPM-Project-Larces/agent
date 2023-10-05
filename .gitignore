@@ -1,0 +1,8 @@
+# IDE Files
+.idea/
+
+# Key Files
+key/
+
+# Privacy Enhanced Mail (PEM) Format
+*.pem
