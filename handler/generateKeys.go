@@ -46,6 +46,10 @@ func GenerateKeys(ctx *gin.Context) {
 	handleError("Error creating primary key", err)
 	defer tpm2.FlushContext(tpm, keyHandle)
 
+	// Read key public part
+	//fmt.Println(tpm2.ReadPublic(tpm, keyHandle))
+	//fmt.Println("\nPublic part: \n", outPublic)
+
 	// Converts outPublic type to bytes
 	publicKey, err := x509.MarshalPKIXPublicKey(outPublic)
 	handleError("Error marshaling primary key", err)
@@ -74,7 +78,7 @@ func GenerateKeys(ctx *gin.Context) {
 	}
 	defer filePublicKey.Close()
 
-	url := "http://localhost:5000/upload_key/"
+	url := "http://localhost:3000/upload_key/"
 
 	// Loads public key in file
 	err = pem.Encode(filePublicKey, blockPublicKey)

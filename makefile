@@ -1,7 +1,6 @@
 .PHONY: default run build test docs clean
-
 # Variables
-APP_NAME=agent
+APP_NAME=back-end
 
 # Tasks
 default: run-with-docs

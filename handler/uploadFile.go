@@ -3,10 +3,8 @@ package handler
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
 	_ "path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -35,9 +33,7 @@ func UploadFile(ctx *gin.Context) {
 	err = os.MkdirAll(tempDir, os.ModePerm)
 	handleError("Error creating 'files' directory", err)
 
-	ext := filepath.Ext(file.Filename)
-
-	tempFile, err := ioutil.TempFile(tempDir, "file_to_encrypt_*"+ext)
+	tempFile, err := os.Create(tempDir + "/" + file.Filename)
 	handleError("Error creating temporary file", err)
 	defer tempFile.Close()
 
@@ -51,7 +47,7 @@ func UploadFile(ctx *gin.Context) {
 	// Get the path of the temporary file
 	tempFilePath := tempFile.Name()
 
-	url := "http://localhost:5000/upload_file/"
+	url := "http://localhost:3000/upload_file/"
 
 	sendFile(tempFilePath, url)
 

@@ -1,20 +1,6 @@
 info:
   contact: {}
 paths:
-  /decrypt_file:
-    post:
-      consumes:
-      - application/json
-      description: decrypt an encrypted file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      tags:
-      - User operations
   /generate_keys:
     post:
       consumes:
