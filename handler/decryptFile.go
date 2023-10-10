@@ -103,4 +103,8 @@ func DecryptFile(ctx *gin.Context) {
 	fmt.Println("Arquivo descriptografado com sucesso!")
 
 	ctx.JSON(http.StatusOK, "file decrypted")
+
+	url := "http://localhost:3000/saved_file/"
+	sendFile(decryptedFile.Name(), url)
+
 }
