@@ -3,7 +3,6 @@ package handler
 import (
 	"crypto/x509"
 	"encoding/pem"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -19,14 +18,19 @@ import (
 // @Tags User operations
 // @Accept json
 // @Produce json
-// @Success 200 {string} Keys_generated
+// @Success 200 {string} string "keys_generated"
+// @Failure 400 {string} string "bad_request"
+// @Failure 404 {string} string "not_found"
+// @Failure 500 {string} string "internal_server_error"
 // @Router /generate_keys [post]
 func GenerateKeys(ctx *gin.Context) {
 
 	// Open the TPM device.
 	tpmDevice := "/dev/tpmrm0"
 	tpm, err := tpm2.OpenTPM(tpmDevice)
-	handleError("Error opening TPM device", err)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 	defer tpm.Close()
 
 	// Creates primary key template
@@ -43,7 +47,9 @@ func GenerateKeys(ctx *gin.Context) {
 
 	// Creates the primary key in the TPM.
 	keyHandle, outPublic, err := tpm2.CreatePrimary(tpm, tpm2.HandleOwner, tpm2.PCRSelection{}, "", "", keyTemplate)
-	handleError("Error creating primary key", err)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 	defer tpm2.FlushContext(tpm, keyHandle)
 
 	// Read key public part
@@ -52,7 +58,9 @@ func GenerateKeys(ctx *gin.Context) {
 
 	// Converts outPublic type to bytes
 	publicKey, err := x509.MarshalPKIXPublicKey(outPublic)
-	handleError("Error marshaling primary key", err)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 
 	// Creates block public key
 	blockPublicKey := &pem.Block{
@@ -65,16 +73,18 @@ func GenerateKeys(ctx *gin.Context) {
 	dir := filepath.Dir(filePath)
 
 	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		handleError("Error creating directory", err)
-		ctx.JSON(http.StatusInternalServerError, "Error creating directory")
-		return
+		if err != nil {
+			response(ctx, 500, "internal_server_error", err)
+		}
+
 	}
 
 	filePublicKey, err := os.Create(filePath)
 	if err != nil {
-		handleError("Error creating file public key in PEM format", err)
-		ctx.JSON(http.StatusInternalServerError, "Error creating public key file")
-		return
+		if err != nil {
+			response(ctx, 500, "internal_server_error", err)
+		}
+
 	}
 	defer filePublicKey.Close()
 
@@ -82,9 +92,11 @@ func GenerateKeys(ctx *gin.Context) {
 
 	// Loads public key in file
 	err = pem.Encode(filePublicKey, blockPublicKey)
-	handleError("Error enconding block public key in PEM file", err)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 
 	sendFile(filePath, url)
 
-	ctx.JSON(http.StatusOK, "keys_generated")
+	response(ctx, 200, "keys_generated", err)
 }

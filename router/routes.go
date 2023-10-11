@@ -1,8 +1,8 @@
 package router
 
 import (
-	docs "github.com/TPM-Project-Larces/back-end.git/docs"
-	"github.com/TPM-Project-Larces/back-end.git/handler"
+	docs "github.com/TPM-Project-Larces/agent.git/docs"
+	"github.com/TPM-Project-Larces/agent.git/handler"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"fmt"
 	"io"
-	"net/http"
 	"os"
 
 	"github.com/google/go-tpm/legacy/tpm2"
@@ -20,21 +18,25 @@ import (
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "File"
-// @Success 200 {string} file_uploaded
+// @Success 200 {string} string "file_decrypted"
+// @Failure 400 {string} string "bad_request"
+// @Failure 404 {string} string "not_found"
+// @Failure 500 {string} string "internal_server_error"
 // @Router /upload_file [post]
 func DecryptFile(ctx *gin.Context) {
 	ctx.Request.ParseMultipartForm(10 << 20)
 
 	file, err := ctx.FormFile("arquivo")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		response(ctx, 400, "bad_request", err)
 	}
 
 	// Open the TPM device.
 	tpmDevice := "/dev/tpmrm0"
 	tpm, err := tpm2.OpenTPM(tpmDevice)
-	handleError("Error opening TPM device", err)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 	defer tpm.Close()
 
 	// Creates primary key template
@@ -51,25 +53,26 @@ func DecryptFile(ctx *gin.Context) {
 
 	// Creates the primary key in the TPM.
 	keyHandle, _, err := tpm2.CreatePrimary(tpm, tpm2.HandleOwner, tpm2.PCRSelection{}, "", "", keyTemplate)
-	handleError("Error creating primary key", err)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 	defer tpm2.FlushContext(tpm, keyHandle)
 
 	tempDir := "./decrypted_files"
 	err = os.MkdirAll(tempDir, os.ModePerm)
-	handleError("Error creating 'decrypted_files' directory", err)
-
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 	// Abra o arquivo cifrado
 	encryptedFile, err := file.Open()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		response(ctx, 500, "internal_server_error", err)
 	}
 	defer encryptedFile.Close()
 
 	decryptedFile, err := os.Create(tempDir + "/" + file.Filename)
 	if err != nil {
-		fmt.Println("Erro ao criar o arquivo descriptografado:", err)
-		return
+		response(ctx, 500, "internal_server_error", err)
 	}
 	defer decryptedFile.Close()
 	buffer := make([]byte, 256)
@@ -82,29 +85,22 @@ func DecryptFile(ctx *gin.Context) {
 			break
 		}
 		if err != nil {
-			fmt.Println("Erro ao ler o arquivo cifrado:", err)
-			return
+			response(ctx, 500, "internal_server_error", err)
 		}
 
 		// Descriptografar o bloco
 		decData, err := tpm2.RSADecrypt(tpm, keyHandle, "", buffer[:n], nil, "")
 		if err != nil {
-			fmt.Println("Erro ao descriptografar o bloco:", err)
-			return
+			response(ctx, 500, "internal_server_error", err)
 		}
 
 		_, err = decryptedFile.Write(decData[11:])
 		if err != nil {
-			fmt.Println("Erro ao escrever no arquivo descriptografado:", err)
-			return
+			response(ctx, 500, "internal_server_error", err)
 		}
 	}
 
-	fmt.Println("Arquivo descriptografado com sucesso!")
-
-	ctx.JSON(http.StatusOK, "file decrypted")
-
 	url := "http://localhost:3000/saved_file/"
 	sendFile(decryptedFile.Name(), url)
-
+	response(ctx, 200, "file_decrypted", err)
 }

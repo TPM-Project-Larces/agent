@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"fmt"
 	"io"
-	"net/http"
 	"os"
 	_ "path/filepath"
 
@@ -19,30 +17,41 @@ import (
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "File"
-// @Success 200 {string} file_uploaded
+// @Success 200 {string} string "file_uploaded"
+// @Failure 400 {string} string "bad_request"
+// @Failure 404 {string} string "not_found"
+// @Failure 500 {string} string "internal_server_error"
 // @Router /upload_file [post]
 func UploadFile(ctx *gin.Context) {
 	ctx.Request.ParseMultipartForm(10 << 20)
 
 	file, err := ctx.FormFile("file")
-	handleError("Error retrieving file from the form", err)
-
-	fmt.Print("File uploaded: " + file.Filename)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 
 	tempDir := "./files"
 	err = os.MkdirAll(tempDir, os.ModePerm)
-	handleError("Error creating 'files' directory", err)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 
 	tempFile, err := os.Create(tempDir + "/" + file.Filename)
-	handleError("Error creating temporary file", err)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 	defer tempFile.Close()
 
 	uploadedFile, err := file.Open()
-	handleError("Error opening the file", err)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 	defer uploadedFile.Close()
 
 	_, err = io.Copy(tempFile, uploadedFile)
-	handleError("Error copying the file to the destination", err)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+	}
 
 	// Get the path of the temporary file
 	tempFilePath := tempFile.Name()
@@ -51,5 +60,5 @@ func UploadFile(ctx *gin.Context) {
 
 	sendFile(tempFilePath, url)
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "File successfully sent to the server"})
+	response(ctx, 200, "file_uploaded", err)
 }
