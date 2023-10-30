@@ -2,7 +2,7 @@ package handler
 
 import (
 	"bytes"
-	"fmt"
+	"errors"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -10,13 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-func handleError(message string, err error) {
-	if err != nil {
-		fmt.Println(message+":", err)
-		panic((err))
-	}
-}
 
 func response(ctx *gin.Context, code int, message string, err error) {
 	response := gin.H{
@@ -34,63 +27,47 @@ func response(ctx *gin.Context, code int, message string, err error) {
 	ctx.JSON(code, response)
 }
 
-func sendFile(fileName string, url string) {
-	// Abra o arquivo que você deseja enviar
-	arquivo, err := os.Open(fileName)
+func sendFile(fileName string, url string) error {
+	file, err := os.Open(fileName)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
-	defer arquivo.Close()
-	// Crie um buffer para a solicitação multipart/form-data
+	defer file.Close()
+
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
 
-	// Adicione o arquivo ao formulário
 	part, err := writer.CreateFormFile("arquivo", fileName)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
-	_, err = io.Copy(part, arquivo)
+	_, err = io.Copy(part, file)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
-
-	// Finalize o formulário
 	writer.Close()
-
-	// Faça uma solicitação HTTP POST para o servidor
 
 	request, err := http.NewRequest("POST", url, &requestBody)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
-
-	// Defina o cabeçalho Content-Type para multipart/form-data
 	request.Header.Set("Content-Type", writer.FormDataContentType())
-
-	// Faça a solicitação
+	
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	defer response.Body.Close()
 
-	// Excluir arquivo se nao for a chave
 	if fileName != "./key/public_key.pem" {
 		os.Remove(fileName)
 	}
 
-	// Verifique a resposta do servidor
 	if response.StatusCode == http.StatusOK {
-		return
+		return nil
 	} else {
-		return
+		return errors.New("file not sent")
 	}
 }

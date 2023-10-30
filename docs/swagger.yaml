@@ -1,11 +1,44 @@
+basePath: /
 info:
   contact: {}
+  description: Agent Operations
+  title: Agent API
+  version: 1.0.0
 paths:
-  /generate_keys:
+  /encryption/decrypt_file:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Decrypt a file
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file_decrypted
+          schema:
+            type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Decrypt file
+      tags:
+      - Encryption
+  /encryption/generate_keys:
     post:
       consumes:
       - application/json
-      description: generat a pair of keys
+      description: Generate a pair of keys
       produces:
       - application/json
       responses:
@@ -13,25 +46,18 @@ paths:
           description: keys_generated
           schema:
             type: string
-        "400":
-          description: bad_request
-          schema:
-            type: string
-        "404":
-          description: not_found
-          schema:
-            type: string
         "500":
-          description: internal_server_error
+          description: internal_server_rror
           schema:
             type: string
+      summary: Generate keys
       tags:
-      - User operations
-  /upload_file:
+      - Encryption
+  /encryption/upload_file:
     post:
       consumes:
       - multipart/form-data
-      description: upload a file to encrypt
+      description: Upload a file to encrypt
       parameters:
       - description: File
         in: formData
@@ -49,14 +75,11 @@ paths:
           description: bad_request
           schema:
             type: string
-        "404":
-          description: not_found
-          schema:
-            type: string
         "500":
-          description: internal_server_error
+          description: internal_server_rror
           schema:
             type: string
+      summary: Upload file
       tags:
-      - User operations
+      - Encryption
 swagger: "2.0"

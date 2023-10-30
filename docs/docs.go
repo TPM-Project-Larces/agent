@@ -15,33 +15,37 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/generate_keys": {
+        "/encryption/decrypt_file": {
             "post": {
-                "description": "generat a pair of keys",
+                "description": "Decrypt a file",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "User operations"
+                    "Encryption"
+                ],
+                "summary": "Decrypt file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
                 ],
                 "responses": {
                     "200": {
-                        "description": "keys_generated",
+                        "description": "file_decrypted",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "400": {
                         "description": "bad_request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "not_found",
                         "schema": {
                             "type": "string"
                         }
@@ -55,9 +59,38 @@ const docTemplate = `{
                 }
             }
         },
-        "/upload_file": {
+        "/encryption/generate_keys": {
             "post": {
-                "description": "upload a file to encrypt",
+                "description": "Generate a pair of keys",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Encryption"
+                ],
+                "summary": "Generate keys",
+                "responses": {
+                    "200": {
+                        "description": "keys_generated",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal_server_rror",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/encryption/upload_file": {
+            "post": {
+                "description": "Upload a file to encrypt",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -65,8 +98,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User operations"
+                    "Encryption"
                 ],
+                "summary": "Upload file",
                 "parameters": [
                     {
                         "type": "file",
@@ -89,14 +123,8 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
-                    "404": {
-                        "description": "not_found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
                     "500": {
-                        "description": "internal_server_error",
+                        "description": "internal_server_rror",
                         "schema": {
                             "type": "string"
                         }
@@ -109,12 +137,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0.0",
 	Host:             "",
-	BasePath:         "",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Agent API",
+	Description:      "Agent Operations",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
