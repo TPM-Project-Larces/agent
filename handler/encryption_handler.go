@@ -86,7 +86,7 @@ func GenerateKeys(ctx *gin.Context) {
 	}
 
 	url := "http://localhost:5000/encryption/upload_key"
-	if err := sendFile(filePath, url); err  != nil {
+	if err := sendFile(filePath, url); err != nil {
 		response(ctx, 500, "keys_not_sent_to_server", nil)
 		return
 	}
@@ -141,7 +141,7 @@ func UploadFile(ctx *gin.Context) {
 	}
 
 	url := "http://localhost:5000/encryption/upload_file/"
-	if err := sendFile(tempFile.Name(), url); err  != nil {
+	if err := sendFile(tempFile.Name(), url); err != nil {
 		response(ctx, 500, "file_not_uploaded", nil)
 		return
 	}
@@ -149,6 +149,60 @@ func UploadFile(ctx *gin.Context) {
 	response(ctx, 200, "file_uploaded", err)
 }
 
+// @BasePath /
+// @Summary Upload encrypted file
+// @Description Upload a file
+// @Tags Encryption
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "File"
+// @Success 200 {string} string "file_uploaded"
+// @Failure 400 {string} string "bad_request"
+// @Failure 500 {string} string "internal_server_rror"
+// @Router /encryption/upload_encrypted_file [post]
+func UploadEncryptedFile(ctx *gin.Context) {
+	ctx.Request.ParseMultipartForm(10 << 20)
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		response(ctx, 400, "bad_request", err)
+	}
+
+	tempDir := "./files"
+	err = os.MkdirAll(tempDir, os.ModePerm)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", nil)
+		return
+	}
+
+	tempFile, err := os.Create(tempDir + "/" + file.Filename)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", nil)
+		return
+	}
+	defer tempFile.Close()
+
+	uploadedFile, err := file.Open()
+	if err != nil {
+		response(ctx, 500, "internal_server_error", nil)
+		return
+	}
+	defer uploadedFile.Close()
+
+	_, err = io.Copy(tempFile, uploadedFile)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", nil)
+		return
+	}
+
+	url := "http://localhost:5000/encryption/upload_encrypted_file/"
+	if err := sendFile(tempFile.Name(), url); err != nil {
+		response(ctx, 500, "file_not_uploaded", nil)
+		return
+	}
+
+	response(ctx, 200, "file_uploaded", err)
+}
 
 // @BasePath /
 // @Summary Decrypt file
@@ -246,10 +300,9 @@ func DecryptFile(ctx *gin.Context) {
 	}
 
 	url := "http://localhost:5000/encryption/saved_file/"
-	if err := sendFile(decryptedFile.Name(), url); err  != nil {
+	if err := sendFile(decryptedFile.Name(), url); err != nil {
 		response(ctx, 500, "file_not_sent_to_server", nil)
 		return
 	}
 	response(ctx, 200, "file_decrypted", nil)
 }
-
