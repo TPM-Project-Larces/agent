@@ -1,39 +1,15 @@
+basePath: /
 info:
   contact: {}
+  description: Agent Operations
+  title: Agent API
+  version: 1.0.0
 paths:
-  /decrypt_file:
-    post:
-      consumes:
-      - application/json
-      description: decrypt an encrypted file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      tags:
-      - User operations
-  /generate_keys:
-    post:
-      consumes:
-      - application/json
-      description: generat a pair of keys
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      tags:
-      - User operations
-  /upload_file:
+  /encryption/decrypt_file:
     post:
       consumes:
       - multipart/form-data
-      description: upload a file to encrypt
+      description: Decrypt a file
       parameters:
       - description: File
         in: formData
@@ -44,9 +20,95 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: file_decrypted
           schema:
             type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Decrypt file
       tags:
-      - User operations
+      - Encryption
+  /encryption/generate_keys:
+    post:
+      consumes:
+      - application/json
+      description: Generate a pair of keys
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: keys_generated
+          schema:
+            type: string
+        "500":
+          description: internal_server_rror
+          schema:
+            type: string
+      summary: Generate keys
+      tags:
+      - Encryption
+  /encryption/upload_encrypted_file:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file to encrypt
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file_uploaded
+          schema:
+            type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "500":
+          description: internal_server_rror
+          schema:
+            type: string
+      summary: Upload encrypted file
+      tags:
+      - Encryption
+  /encryption/upload_file:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file to encrypt
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file_uploaded
+          schema:
+            type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "500":
+          description: internal_server_rror
+          schema:
+            type: string
+      summary: Upload file
+      tags:
+      - Encryption
 swagger: "2.0"
