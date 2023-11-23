@@ -90,7 +90,7 @@ const docTemplate = `{
         },
         "/encryption/upload_encrypted_file": {
             "post": {
-                "description": "Upload a file to encrypt",
+                "description": "Upload a file",
                 "consumes": [
                     "multipart/form-data"
                 ],

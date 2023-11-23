@@ -3,6 +3,7 @@ package handler
 import (
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -139,10 +140,10 @@ func UploadFile(ctx *gin.Context) {
 		response(ctx, 500, "internal_server_error", nil)
 		return
 	}
-
-	url := "http://localhost:5000/encryption/upload_file/"
+	fmt.Println(tempFile.Name())
+	url := "http://localhost:5000/file/upload_file/"
 	if err := sendFile(tempFile.Name(), url); err != nil {
-		response(ctx, 500, "file_not_uploaded", nil)
+		response(ctx, 500, "file_not_uploaded", err)
 		return
 	}
 
@@ -166,42 +167,43 @@ func UploadEncryptedFile(ctx *gin.Context) {
 	file, err := ctx.FormFile("file")
 	if err != nil {
 		response(ctx, 400, "bad_request", err)
-	}
-
-	tempDir := "./files"
-	err = os.MkdirAll(tempDir, os.ModePerm)
-	if err != nil {
-		response(ctx, 500, "internal_server_error", nil)
 		return
 	}
 
-	tempFile, err := os.Create(tempDir + "/" + file.Filename)
+	tempDir := "./files"
+	if err := os.MkdirAll(tempDir, os.ModePerm); err != nil {
+		response(ctx, 500, "internal_server_error", err)
+		return
+	}
+
+	tempFilePath := filepath.Join(tempDir, file.Filename)
+	tempFile, err := os.Create(tempFilePath)
 	if err != nil {
-		response(ctx, 500, "internal_server_error", nil)
+		response(ctx, 500, "internal_server_error", err)
 		return
 	}
 	defer tempFile.Close()
 
 	uploadedFile, err := file.Open()
 	if err != nil {
-		response(ctx, 500, "internal_server_error", nil)
+		response(ctx, 500, "internal_server_error", err)
 		return
 	}
 	defer uploadedFile.Close()
 
 	_, err = io.Copy(tempFile, uploadedFile)
 	if err != nil {
-		response(ctx, 500, "internal_server_error", nil)
+		response(ctx, 500, "internal_server_error", err)
 		return
 	}
 
-	url := "http://localhost:5000/encryption/upload_encrypted_file/"
-	if err := sendFile(tempFile.Name(), url); err != nil {
+	url := "http://localhost:5000/file/upload_encrypted_file/"
+	if err := sendFile(tempFilePath, url); err != nil {
 		response(ctx, 500, "file_not_uploaded", nil)
 		return
 	}
 
-	response(ctx, 200, "file_uploaded", err)
+	response(ctx, 200, "file_uploaded", nil)
 }
 
 // @BasePath /
@@ -223,6 +225,7 @@ func DecryptFile(ctx *gin.Context) {
 		response(ctx, 400, "bad_request", err)
 		return
 	}
+	fmt.Println(file.Filename)
 
 	// Open the TPM device.
 	tpmDevice := "/dev/tpmrm0"
@@ -244,7 +247,7 @@ func DecryptFile(ctx *gin.Context) {
 			ModulusRaw: make([]byte, 256),
 		},
 	}
-
+	fmt.Println("tst2")
 	// Creates the primary key in the TPM.
 	keyHandle, _, err := tpm2.CreatePrimary(tpm, tpm2.HandleOwner, tpm2.PCRSelection{}, "", "", keyTemplate)
 	if err != nil {
@@ -259,7 +262,7 @@ func DecryptFile(ctx *gin.Context) {
 		response(ctx, 500, "internal_server_error", nil)
 		return
 	}
-
+	fmt.Println("tst3")
 	encryptedFile, err := file.Open()
 	if err != nil {
 		response(ctx, 500, "internal_server_error", nil)
@@ -299,10 +302,13 @@ func DecryptFile(ctx *gin.Context) {
 		}
 	}
 
-	url := "http://localhost:5000/encryption/saved_file/"
+	fmt.Println("tst4")
+
+	url := "http://localhost:5000/file/upload_encrypted_file"
 	if err := sendFile(decryptedFile.Name(), url); err != nil {
 		response(ctx, 500, "file_not_sent_to_server", nil)
 		return
 	}
+	fmt.Println("tst5")
 	response(ctx, 200, "file_decrypted", nil)
 }

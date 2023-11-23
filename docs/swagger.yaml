@@ -57,7 +57,7 @@ paths:
     post:
       consumes:
       - multipart/form-data
-      description: Upload a file to encrypt
+      description: Upload a file
       parameters:
       - description: File
         in: formData
