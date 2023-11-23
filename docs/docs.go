@@ -30,10 +30,10 @@ const docTemplate = `{
                 "summary": "Decrypt file",
                 "parameters": [
                     {
-                        "type": "file",
-                        "description": "File",
-                        "name": "file",
-                        "in": "formData",
+                        "type": "string",
+                        "description": "Filename",
+                        "name": "filename",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -88,9 +88,111 @@ const docTemplate = `{
                 }
             }
         },
+        "/encryption/save_file": {
+            "post": {
+                "description": "Save file",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "File"
+                ],
+                "summary": "Save file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "file_saved",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "bad_request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "not_found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal_server_error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/encryption/size_and_decrypt": {
+            "post": {
+                "description": "Get size and decrypt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Encryption"
+                ],
+                "summary": "Get size and decrypt",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.StringData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "file_decrypted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "bad_request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "not_found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal_server_error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/encryption/upload_encrypted_file": {
             "post": {
-                "description": "Upload a file to encrypt",
+                "description": "Upload a file",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -173,6 +275,16 @@ const docTemplate = `{
                             "type": "string"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handler.StringData": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
                 }
             }
         }

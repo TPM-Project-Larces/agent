@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io"
 	"mime/multipart"
@@ -53,7 +54,7 @@ func sendFile(fileName string, url string) error {
 		return err
 	}
 	request.Header.Set("Content-Type", writer.FormDataContentType())
-	
+
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
@@ -69,5 +70,37 @@ func sendFile(fileName string, url string) error {
 		return nil
 	} else {
 		return errors.New("file not sent")
+	}
+}
+
+type StringData struct {
+	Data string `json:"data"`
+}
+
+func sendString(data string, url string) error {
+	stringData := StringData{Data: data}
+
+	requestBody, err := json.Marshal(stringData)
+	if err != nil {
+		return err
+	}
+
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Content-Type", "application/json") // Define o tipo de conteúdo como JSON
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode == http.StatusOK {
+		return nil
+	} else {
+		return errors.New("string not sent")
 	}
 }
