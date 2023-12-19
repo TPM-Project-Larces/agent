@@ -86,8 +86,14 @@ func GenerateKeys(ctx *gin.Context) {
 		return
 	}
 
+	token, err := Login()
+	if err != nil || token == "" {
+		response(ctx, 500, "internal_server_error", nil)
+		return
+	}
+
 	url := "http://localhost:5000/encryption/upload_key"
-	if err := sendFile(filePath, url); err != nil {
+	if err := sendFile(filePath, token, url); err != nil {
 		response(ctx, 500, "keys_not_sent_to_server", nil)
 		return
 	}
@@ -141,8 +147,35 @@ func UploadFile(ctx *gin.Context) {
 		return
 	}
 	fmt.Println(tempFile.Name())
-	url := "http://localhost:5000/file/upload_file/"
-	if err := sendFile(tempFile.Name(), url); err != nil {
+
+	token, err := Login()
+	if err != nil {
+		response(ctx, 500, "internal_server_error", nil)
+		return
+	}
+
+	fileChallenge, FileSign, FileAttestationKey := AttestationTPM()
+
+	urlattestation := "http://localhost:5000/attestation/upload_challenge/"
+	if err := sendFile(fileChallenge, token, urlattestation); err != nil {
+		response(ctx, 500, "challenge_failed", err)
+		return
+	}
+
+	urlattestation2 := "http://localhost:5000/attestation/upload_signature/"
+	if err := sendFile(FileSign, token, urlattestation2); err != nil {
+		response(ctx, 500, "signature_failed", err)
+		return
+	}
+
+	urlattestation3 := "http://localhost:5000/attestation/upload_attestation_key/"
+	if err := sendFile(FileAttestationKey, token, urlattestation3); err != nil {
+		response(ctx, 500, "attestation_key_failed", err)
+		return
+	}
+
+	url := "http://localhost:5000/encryption/upload_file"
+	if err := sendFile(tempFile.Name(), token, url); err != nil {
 		response(ctx, 500, "file_not_uploaded", err)
 		return
 	}
@@ -197,8 +230,14 @@ func UploadEncryptedFile(ctx *gin.Context) {
 		return
 	}
 
+	token, err := Login()
+	if err != nil {
+		response(ctx, 500, "internal_server_error", nil)
+		return
+	}
+
 	url := "http://localhost:5000/file/upload_encrypted_file/"
-	if err := sendFile(tempFilePath, url); err != nil {
+	if err := sendFile(tempFilePath, token, url); err != nil {
 		response(ctx, 500, "file_not_uploaded", nil)
 		return
 	}
@@ -302,10 +341,15 @@ func DecryptFile(ctx *gin.Context) {
 		}
 	}
 
-	fmt.Println("tst4")
+	token, err := Login()
+	if err != nil {
+		response(ctx, 500, "internal_server_error", nil)
+		return
+	}
 
 	url := "http://localhost:5000/file/upload_encrypted_file"
-	if err := sendFile(decryptedFile.Name(), url); err != nil {
+
+	if err := sendFile(decryptedFile.Name(), token, url); err != nil {
 		response(ctx, 500, "file_not_sent_to_server", nil)
 		return
 	}
