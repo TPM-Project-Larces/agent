@@ -1,4 +1,10 @@
 basePath: /
+definitions:
+  handler.StringData:
+    properties:
+      data:
+        type: string
+    type: object
 info:
   contact: {}
   description: Agent Operations
@@ -11,11 +17,11 @@ paths:
       - multipart/form-data
       description: Decrypt a file
       parameters:
-      - description: File
-        in: formData
-        name: file
+      - description: Filename
+        in: query
+        name: filename
         required: true
-        type: file
+        type: string
       produces:
       - application/json
       responses:
@@ -53,11 +59,78 @@ paths:
       summary: Generate keys
       tags:
       - Encryption
+  /encryption/save_file:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Save file
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file_saved
+          schema:
+            type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "404":
+          description: not_found
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Save file
+      tags:
+      - File
+  /encryption/size_and_decrypt:
+    post:
+      consumes:
+      - application/json
+      description: Get size and decrypt
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.StringData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file_decrypted
+          schema:
+            type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "404":
+          description: not_found
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Get size and decrypt
+      tags:
+      - Encryption
   /encryption/upload_encrypted_file:
     post:
       consumes:
       - multipart/form-data
-      description: Upload a file to encrypt
+      description: Upload a file
       parameters:
       - description: File
         in: formData
