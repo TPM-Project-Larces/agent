@@ -38,6 +38,41 @@ func response(ctx *gin.Context, code int, message string, err error) {
 	ctx.JSON(code, response)
 }
 
+func sendPutRequest(token string, url string) error {
+	req, err := http.NewRequest("PUT", url, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	_, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func sendDeleteRequest(token string, url string) error {
+
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	_, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func sendFile(fileName string, token string, url string) error {
 
 	file, err := os.Open(fileName)
@@ -90,6 +125,57 @@ func sendFile(fileName string, token string, url string) error {
 		return nil
 	} else {
 		return errors.New("file not sent")
+	}
+}
+
+func sendFileDeleteRequest(fileName string, token string, url string) error {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	var requestBody bytes.Buffer
+	writer := multipart.NewWriter(&requestBody)
+
+	part, err := writer.CreateFormFile("arquivo", filepath.Base(fileName))
+	if err != nil {
+		fmt.Println("Erro ao criar o campo de arquivo:", err)
+		return err
+	}
+
+	_, err = io.Copy(part, file)
+	if err != nil {
+		fmt.Println("Erro ao copiar o conteúdo do arquivo para o formulário:", err)
+		return err
+	}
+
+	err = writer.WriteField("token", token)
+	if err != nil {
+		fmt.Println("Erro ao adicionar o campo de token ao formulário:", err)
+		return err
+	}
+
+	request, err := http.NewRequest("DELETE", url, &requestBody)
+	if err != nil {
+		fmt.Println("Erro ao criar a requisição HTTP:", err)
+		return err
+	}
+
+	request.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println("Erro ao fazer a solicitação HTTP para a outra API:", err)
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode == http.StatusOK {
+		return nil
+	} else {
+		return errors.New("request not successful")
 	}
 }
 
@@ -339,3 +425,31 @@ func Login() (string, error) {
 	fmt.Println(token)
 	return token, nil
 }
+
+/*func sendString(stringToSend string, token string, url string) error {
+
+	requestBody := fmt.Sprintf(`{"string": "%s"}`, stringToSend)
+
+	// Faça a solicitação POST para a segunda API com o token no cabeçalho
+	request, err := http.NewRequest("POST", url, bytes.NewBufferString(requestBody))
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("Content-Type", "application/json")
+
+	// Envie a solicitação
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	// Verifique o código de status da resposta
+	if response.StatusCode == http.StatusOK {
+		return nil
+	} else {
+		return errors.New("request not successful")
+	}
+}*/

@@ -1,4 +1,4 @@
-package schema
+package schemas
 
 type LoginResponse struct {
 	Message string `json:"message"`

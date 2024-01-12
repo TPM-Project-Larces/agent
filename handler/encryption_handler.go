@@ -174,7 +174,7 @@ func UploadFile(ctx *gin.Context) {
 		return
 	}
 
-	url := "http://localhost:5000/encryption/upload_file"
+	url := "http://localhost:5000/file/upload_file"
 	if err := sendFile(tempFile.Name(), token, url); err != nil {
 		response(ctx, 500, "file_not_uploaded", err)
 		return
@@ -286,7 +286,7 @@ func DecryptFile(ctx *gin.Context) {
 			ModulusRaw: make([]byte, 256),
 		},
 	}
-	fmt.Println("tst2")
+
 	// Creates the primary key in the TPM.
 	keyHandle, _, err := tpm2.CreatePrimary(tpm, tpm2.HandleOwner, tpm2.PCRSelection{}, "", "", keyTemplate)
 	if err != nil {
@@ -353,6 +353,68 @@ func DecryptFile(ctx *gin.Context) {
 		response(ctx, 500, "file_not_sent_to_server", nil)
 		return
 	}
-	fmt.Println("tst5")
+	response(ctx, 200, "file_decrypted", nil)
+}
+
+// @BasePath /
+// @Summary Decrypt a file
+// @Description Decrypt a file stored in server
+// @Tags File
+// @Produce json
+// @Param file formData file true "File"
+// @Success 200 {string} string "file_decrypted"
+// @Failure 400 {string} string "bad_request"
+// @Failure 404 {string} string "not_found"
+// @Failure 500 {string} string "internal_server_error"
+// @Router /encryption/decrypt_saved_file [post]
+func DecryptServerFile(ctx *gin.Context) {
+
+	ctx.Request.ParseMultipartForm(10 << 20)
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		response(ctx, 400, "bad_request", err)
+		return
+	}
+
+	tempDir := "./files"
+	if err := os.MkdirAll(tempDir, os.ModePerm); err != nil {
+		response(ctx, 500, "internal_server_error", err)
+		return
+	}
+
+	tempFilePath := filepath.Join(tempDir, file.Filename)
+	tempFile, err := os.Create(tempFilePath)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+		return
+	}
+	defer tempFile.Close()
+
+	uploadedFile, err := file.Open()
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+		return
+	}
+	defer uploadedFile.Close()
+
+	_, err = io.Copy(tempFile, uploadedFile)
+	if err != nil {
+		response(ctx, 500, "internal_server_error", err)
+		return
+	}
+
+	token, err := Login()
+	if err != nil {
+		response(ctx, 500, "internal_server_error", nil)
+		return
+	}
+
+	url := "http://localhost:5000/encryption/decrypt_file"
+	if err := sendFile(tempFilePath, token, url); err != nil {
+		response(ctx, 500, "file_not_decrypted", nil)
+		return
+	}
+
 	response(ctx, 200, "file_decrypted", nil)
 }

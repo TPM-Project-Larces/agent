@@ -15,6 +15,8 @@ func InitializeRoutes() {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	encryptionRoutes(router, basePath, "encryption/")
+	userRoutes(router, basePath, "user/")
+	fileRoutes(router, basePath, "file/")
 
 	router.Run(":3000")
 }

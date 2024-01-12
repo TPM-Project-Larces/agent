@@ -34,6 +34,37 @@ paths:
       summary: Decrypt file
       tags:
       - Encryption
+  /encryption/decrypt_saved_file:
+    post:
+      description: Decrypt a file stored in server
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file_decrypted
+          schema:
+            type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "404":
+          description: not_found
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Decrypt a file
+      tags:
+      - File
   /encryption/generate_keys:
     post:
       consumes:
@@ -111,4 +142,76 @@ paths:
       summary: Upload file
       tags:
       - Encryption
+  /file/delete_file:
+    post:
+      description: deletes a file
+      parameters:
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file_deleted
+          schema:
+            type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "404":
+          description: not_found
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Delete file
+      tags:
+      - File
+  /user:
+    delete:
+      description: Delete a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user_deleted
+          schema:
+            type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "500":
+          description: internal_server_rror
+          schema:
+            type: string
+      summary: Delete user
+      tags:
+      - User
+    put:
+      description: Upload a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user_uploaded
+          schema:
+            type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "500":
+          description: internal_server_rror
+          schema:
+            type: string
+      summary: Upload user
+      tags:
+      - User
 swagger: "2.0"

@@ -40,19 +40,66 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "file_decrypted",
-                        "schema": {
+                        "schemas": {
                             "type": "string"
                         }
                     },
                     "400": {
                         "description": "bad_request",
-                        "schema": {
+                        "schemas": {
                             "type": "string"
                         }
                     },
                     "500": {
                         "description": "internal_server_error",
-                        "schema": {
+                        "schemas": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/encryption/decrypt_saved_file": {
+            "post": {
+                "description": "Decrypt a file stored in server",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "File"
+                ],
+                "summary": "Decrypt a file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "file_decrypted",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "bad_request",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "not_found",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal_server_error",
+                        "schemas": {
                             "type": "string"
                         }
                     }
@@ -75,13 +122,13 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "keys_generated",
-                        "schema": {
+                        "schemas": {
                             "type": "string"
                         }
                     },
                     "500": {
                         "description": "internal_server_rror",
-                        "schema": {
+                        "schemas": {
                             "type": "string"
                         }
                     }
@@ -113,19 +160,19 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "file_uploaded",
-                        "schema": {
+                        "schemas": {
                             "type": "string"
                         }
                     },
                     "400": {
                         "description": "bad_request",
-                        "schema": {
+                        "schemas": {
                             "type": "string"
                         }
                     },
                     "500": {
                         "description": "internal_server_rror",
-                        "schema": {
+                        "schemas": {
                             "type": "string"
                         }
                     }
@@ -157,19 +204,128 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "file_uploaded",
-                        "schema": {
+                        "schemas": {
                             "type": "string"
                         }
                     },
                     "400": {
                         "description": "bad_request",
-                        "schema": {
+                        "schemas": {
                             "type": "string"
                         }
                     },
                     "500": {
                         "description": "internal_server_rror",
-                        "schema": {
+                        "schemas": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/file/delete_file": {
+            "post": {
+                "description": "deletes a file",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "File"
+                ],
+                "summary": "Delete file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "file_deleted",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "bad_request",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "not_found",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal_server_error",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "put": {
+                "description": "Upload a user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Upload user",
+                "responses": {
+                    "200": {
+                        "description": "user_uploaded",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "bad_request",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal_server_rror",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Delete user",
+                "responses": {
+                    "200": {
+                        "description": "user_deleted",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "bad_request",
+                        "schemas": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal_server_rror",
+                        "schemas": {
                             "type": "string"
                         }
                     }
