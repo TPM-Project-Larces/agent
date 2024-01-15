@@ -5,16 +5,20 @@ import (
 )
 
 // @BasePath /
-// @Summary Upload user
-// @Description Upload a user
+// @Summary Find user by username
+// @Description Provide the user data
 // @Tags User
 // @Produce json
-// @Success 200 {string} string "user_uploaded"
+// @Param username query string true "User`s username to find"
+// @Success 200 {object} schemas.ShowUserResponse
 // @Failure 400 {string} string "bad_request"
-// @Failure 500 {string} string "internal_server_rror"
-// @Router /user [put]
-func UploadUser(ctx *gin.Context) {
+// @Failure 404 {string} string "not_found"
+// @Failure 500 {string} string "internal_server_error"
+// @Router /user/username [get]
+func GetUserByUsername(ctx *gin.Context) {
 	ctx.Request.ParseMultipartForm(10 << 20)
+
+	username := ctx.Query("username")
 
 	token, err := Login()
 	if err != nil {
@@ -22,13 +26,14 @@ func UploadUser(ctx *gin.Context) {
 		return
 	}
 
-	url := "http://localhost:5000/user"
-	if err := sendPutRequest(token, url); err != nil {
-		response(ctx, 500, "file_not_uploaded", nil)
+	url := "http://localhost:5000/user/username?username=" + username
+	user, err := sendGetRequestForUser(token, url)
+	if err != nil {
+		response(ctx, 500, "user_not_found", nil)
 		return
 	}
 
-	response(ctx, 200, "file_uploaded", nil)
+	ctx.JSON(200, gin.H{"message": "user", "user": user})
 }
 
 // @BasePath /
@@ -39,7 +44,7 @@ func UploadUser(ctx *gin.Context) {
 // @Success 200 {object} schemas.ListUsersResponse
 // @Failure 400 {string} string "bad_request"
 // @Failure 500 {string} string "internal_server_rror"
-// @Router /user [put]
+// @Router /user [get]
 func GetUsers(ctx *gin.Context) {
 	ctx.Request.ParseMultipartForm(10 << 20)
 
@@ -50,12 +55,13 @@ func GetUsers(ctx *gin.Context) {
 	}
 
 	url := "http://localhost:5000/user"
-	if err := sendPutRequest(token, url); err != nil {
-		response(ctx, 500, "file_not_uploaded", nil)
+	users, err := sendGetRequest(token, url)
+	if err != nil {
+		response(ctx, 500, "users_not_get", nil)
 		return
 	}
 
-	response(ctx, 200, "file_uploaded", nil)
+	ctx.JSON(200, gin.H{"message": "all_users", "users": users})
 }
 
 // @BasePath /

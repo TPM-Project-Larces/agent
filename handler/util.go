@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/TPM-Project-Larces/agent.git/model"
 	"github.com/google/go-tpm/legacy/tpm2"
 	"github.com/google/go-tpm/tpmutil"
 	"io"
@@ -38,21 +39,123 @@ func response(ctx *gin.Context, code int, message string, err error) {
 	ctx.JSON(code, response)
 }
 
-func sendPutRequest(token string, url string) error {
-	req, err := http.NewRequest("PUT", url, nil)
+func sendGetFileRequestByUsername(token string, url string) ([]model.EncryptedFile, error) {
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	client := &http.Client{}
-	_, err = client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		var filesResponse struct {
+			File []model.EncryptedFile `json:"files"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&filesResponse); err != nil {
+			log.Fatalf("erro no decode %v", err)
+			return nil, err
+		}
+		return filesResponse.File, nil
 	}
 
-	return nil
+	return nil, errors.New("request not successful")
+
+}
+
+func sendGetFileRequestByName(token string, url string) (model.EncryptedFile, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return model.EncryptedFile{}, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return model.EncryptedFile{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		var filesResponse struct {
+			Files model.EncryptedFile `json:"file"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&filesResponse); err != nil {
+			log.Fatalf("erro no decode %v", err)
+			return model.EncryptedFile{}, err
+		}
+		return filesResponse.Files, nil
+	}
+
+	return model.EncryptedFile{}, errors.New("request not successful")
+
+}
+
+func sendGetRequestForUser(token string, url string) (model.User, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return model.User{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		var response struct {
+			User model.User `json:"user"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+			log.Fatalf("erro no decoder %v", err)
+			return model.User{}, err
+		}
+		return response.User, nil
+	}
+
+	return model.User{}, errors.New("request not successful")
+}
+
+func sendGetRequest(token string, url string) ([]model.User, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		var usersResponse struct {
+			Users []model.User `json:"users"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&usersResponse); err != nil {
+			log.Fatalf("erro no decoder %v", err)
+			return nil, err
+		}
+		return usersResponse.Users, nil
+	}
+
+	return nil, errors.New("request not successful")
+
 }
 
 func sendDeleteRequest(token string, url string) error {

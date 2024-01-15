@@ -1,4 +1,96 @@
 basePath: /
+definitions:
+  model.Address:
+    properties:
+      city:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      zipcode:
+        type: string
+    type: object
+  model.Contact:
+    properties:
+      celphone:
+        type: string
+      phone:
+        type: string
+    type: object
+  schemas.EncryptedFileResponse:
+    properties:
+      createdAt:
+        description: AnonymizedFile AnonymizedFile     `bson:"anonymized_file"`
+        type: string
+      data:
+        items:
+          type: integer
+        type: array
+      deletedAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      username:
+        type: string
+    type: object
+  schemas.ListFilesResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/schemas.EncryptedFileResponse'
+        type: array
+      message:
+        type: string
+    type: object
+  schemas.ListUsersResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/schemas.UserResponse'
+        type: array
+    type: object
+  schemas.ShowFileResponse:
+    properties:
+      data:
+        $ref: '#/definitions/schemas.EncryptedFileResponse'
+      message:
+        type: string
+    type: object
+  schemas.ShowUserResponse:
+    properties:
+      data:
+        $ref: '#/definitions/schemas.UserResponse'
+    type: object
+  schemas.UserResponse:
+    properties:
+      address:
+        $ref: '#/definitions/model.Address'
+      contact:
+        $ref: '#/definitions/model.Contact'
+      cpf:
+        type: string
+      createdAt:
+        type: string
+      dateOfBirth:
+        type: string
+      deletedAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
   description: Agent Operations
@@ -142,6 +234,85 @@ paths:
       summary: Upload file
       tags:
       - Encryption
+  /file:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all encrypted files
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.ListFilesResponse'
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Get all encrypted files
+      tags:
+      - File
+  /file/by_name:
+    get:
+      description: Provide the file data
+      parameters:
+      - description: filename to find
+        in: query
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.ShowFileResponse'
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "404":
+          description: not_found
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Find file by name
+      tags:
+      - File
+  /file/by_username:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of encrypted files by username
+      parameters:
+      - description: Username
+        in: query
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.ListFilesResponse'
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Get encrypted files by username
+      tags:
+      - File
   /file/delete_file:
     post:
       description: deletes a file
@@ -194,15 +365,15 @@ paths:
       summary: Delete user
       tags:
       - User
-    put:
-      description: Upload a user
+    get:
+      description: Get all users
       produces:
       - application/json
       responses:
         "200":
-          description: user_uploaded
+          description: OK
           schema:
-            type: string
+            $ref: '#/definitions/schemas.ListUsersResponse'
         "400":
           description: bad_request
           schema:
@@ -211,7 +382,38 @@ paths:
           description: internal_server_rror
           schema:
             type: string
-      summary: Upload user
+      summary: Get all users
+      tags:
+      - User
+  /user/username:
+    get:
+      description: Provide the user data
+      parameters:
+      - description: User`s username to find
+        in: query
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.ShowUserResponse'
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "404":
+          description: not_found
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Find user by username
       tags:
       - User
 swagger: "2.0"

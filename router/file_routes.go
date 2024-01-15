@@ -7,8 +7,11 @@ import (
 
 func fileRoutes(router *gin.Engine, basePath string, pathResource string) {
 
-	encryption := router.Group(basePath + pathResource)
+	file := router.Group(basePath + pathResource)
 	{
-		encryption.POST("/delete_file", handler.DeleteFile)
+		file.GET("", handler.GetFiles)
+		file.GET("/by_username", handler.GetFilesByUsername)
+		file.POST("/delete_file", handler.DeleteFile)
+		file.GET("/by_name", handler.GetFileByName)
 	}
 }

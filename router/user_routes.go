@@ -9,7 +9,8 @@ func userRoutes(router *gin.Engine, basePath string, pathResource string) {
 
 	user := router.Group(basePath + pathResource)
 	{
-		user.PUT("", handler.UploadUser)
+		user.GET("/username", handler.GetUserByUsername)
+		user.GET("", handler.GetUsers)
 		user.DELETE("", handler.DeleteUser)
 	}
 }
