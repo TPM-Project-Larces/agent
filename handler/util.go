@@ -501,7 +501,7 @@ func authLogin(email string, password string, url string) string {
 	return token
 }
 
-func Login() (string, error) {
+func Auth() (string, error) {
 
 	f := "./config/config.txt"
 

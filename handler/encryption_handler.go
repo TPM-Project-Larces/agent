@@ -86,7 +86,7 @@ func GenerateKeys(ctx *gin.Context) {
 		return
 	}
 
-	token, err := Login()
+	token, err := Auth()
 	if err != nil || token == "" {
 		response(ctx, 500, "internal_server_error", nil)
 		return
@@ -148,7 +148,7 @@ func UploadFile(ctx *gin.Context) {
 	}
 	fmt.Println(tempFile.Name())
 
-	token, err := Login()
+	token, err := Auth()
 	if err != nil {
 		response(ctx, 500, "internal_server_error", nil)
 		return
@@ -230,7 +230,7 @@ func UploadEncryptedFile(ctx *gin.Context) {
 		return
 	}
 
-	token, err := Login()
+	token, err := Auth()
 	if err != nil {
 		response(ctx, 500, "internal_server_error", nil)
 		return
@@ -341,7 +341,7 @@ func DecryptFile(ctx *gin.Context) {
 		}
 	}
 
-	token, err := Login()
+	token, err := Auth()
 	if err != nil {
 		response(ctx, 500, "internal_server_error", nil)
 		return
@@ -404,7 +404,7 @@ func DecryptServerFile(ctx *gin.Context) {
 		return
 	}
 
-	token, err := Login()
+	token, err := Auth()
 	if err != nil {
 		response(ctx, 500, "internal_server_error", nil)
 		return

@@ -19,7 +19,7 @@ import (
 func GetFiles(ctx *gin.Context) {
 	ctx.Request.ParseMultipartForm(10 << 20)
 
-	token, err := Login()
+	token, err := Auth()
 	if err != nil {
 		response(ctx, 500, "internal_server_error", nil)
 		return
@@ -51,7 +51,7 @@ func GetFilesByUsername(ctx *gin.Context) {
 
 	username := ctx.Query("username")
 
-	token, err := Login()
+	token, err := Auth()
 	if err != nil {
 		response(ctx, 500, "internal_server_error", nil)
 		return
@@ -82,7 +82,7 @@ func GetFileByName(ctx *gin.Context) {
 
 	filename := ctx.Query("filename")
 
-	token, err := Login()
+	token, err := Auth()
 	if err != nil {
 		response(ctx, 500, "internal_server_error", nil)
 		return
@@ -146,7 +146,7 @@ func DeleteFile(ctx *gin.Context) {
 		return
 	}
 
-	token, err := Login()
+	token, err := Auth()
 	if err != nil {
 		response(ctx, 500, "internal_server_error", nil)
 		return

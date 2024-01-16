@@ -18,6 +18,37 @@ definitions:
       phone:
         type: string
     type: object
+  schemas.AuthResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  schemas.CreateUserRequest:
+    properties:
+      address:
+        $ref: '#/definitions/model.Address'
+      contact:
+        $ref: '#/definitions/model.Contact'
+      cpf:
+        type: string
+      dateOfBirth:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  schemas.CreateUserResponse:
+    properties:
+      data:
+        $ref: '#/definitions/schemas.UserResponse'
+      message:
+        type: string
+    type: object
   schemas.EncryptedFileResponse:
     properties:
       createdAt:
@@ -52,6 +83,13 @@ definitions:
           $ref: '#/definitions/schemas.UserResponse'
         type: array
     type: object
+  schemas.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   schemas.ShowFileResponse:
     properties:
       data:
@@ -63,6 +101,32 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/schemas.UserResponse'
+    type: object
+  schemas.UpdateUserRequest:
+    properties:
+      address:
+        $ref: '#/definitions/model.Address'
+      contact:
+        $ref: '#/definitions/model.Contact'
+      cpf:
+        type: string
+      dateOfBirth:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  schemas.UpdateUserResponse:
+    properties:
+      data:
+        $ref: '#/definitions/schemas.UserResponse'
+      message:
+        type: string
     type: object
   schemas.UserResponse:
     properties:
@@ -97,6 +161,36 @@ info:
   title: Agent API
   version: 1.0.0
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.AuthResponse'
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Create user
+      tags:
+      - Auth
   /encryption/decrypt_file:
     post:
       consumes:
@@ -383,6 +477,66 @@ paths:
           schema:
             type: string
       summary: Get all users
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.CreateUserResponse'
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Create user
+      tags:
+      - User
+    put:
+      description: Updates a user
+      parameters:
+      - description: User data to Update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.UpdateUserResponse'
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "404":
+          description: user_not_found
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Update user
       tags:
       - User
   /user/username:

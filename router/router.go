@@ -14,6 +14,7 @@ func InitializeRoutes() {
 	router := gin.Default()
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
+	authRoutes(router, basePath, "auth/")
 	encryptionRoutes(router, basePath, "encryption/")
 	userRoutes(router, basePath, "user/")
 	fileRoutes(router, basePath, "file/")
