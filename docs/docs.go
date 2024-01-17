@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/auth/login": {
             "post": {
-                "description": "Create a new user",
+                "description": "Login a user",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,7 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Create user",
+                "summary": "Login user",
                 "parameters": [
                     {
                         "description": "Request body",
@@ -63,7 +63,7 @@ const docTemplate = `{
         },
         "/encryption/decrypt_file": {
             "post": {
-                "description": "Decrypt a file",
+                "description": "Search for a file to decrypt",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -76,10 +76,10 @@ const docTemplate = `{
                 "summary": "Decrypt file",
                 "parameters": [
                     {
-                        "type": "file",
-                        "description": "File",
-                        "name": "file",
-                        "in": "formData",
+                        "type": "string",
+                        "description": "Filename",
+                        "name": "filename",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -92,53 +92,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "bad_request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "internal_server_error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/encryption/decrypt_saved_file": {
-            "post": {
-                "description": "Decrypt a file stored in server",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "File"
-                ],
-                "summary": "Decrypt a file",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "File",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "file_decrypted",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "bad_request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "not_found",
                         "schema": {
                             "type": "string"
                         }
@@ -174,6 +127,108 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "internal_server_rror",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/encryption/save_file": {
+            "post": {
+                "description": "Save file",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Encryption"
+                ],
+                "summary": "Save file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "file_saved",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "bad_request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "not_found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal_server_error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/encryption/size_and_decrypt": {
+            "post": {
+                "description": "Get size and decrypt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Encryption"
+                ],
+                "summary": "Get size and decrypt",
+                "parameters": [
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.StringData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "file_decrypted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "bad_request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "not_found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal_server_error",
                         "schema": {
                             "type": "string"
                         }
@@ -638,6 +693,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "handler.StringData": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Address": {
             "type": "object",
             "properties": {
@@ -718,7 +781,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "createdAt": {
-                    "description": "AnonymizedFile AnonymizedFile     ` + "`" + `bson:\"anonymized_file\"` + "`" + `",
                     "type": "string"
                 },
                 "data": {

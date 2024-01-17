@@ -9,9 +9,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/TPM-Project-Larces/agent.git/model"
-	"github.com/google/go-tpm/legacy/tpm2"
-	"github.com/google/go-tpm/tpmutil"
 	"io"
 	"io/ioutil"
 	"log"
@@ -19,6 +16,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/TPM-Project-Larces/agent.git/model"
+	"github.com/google/go-tpm/legacy/tpm2"
+	"github.com/google/go-tpm/tpmutil"
 
 	"github.com/gin-gonic/gin"
 )
@@ -529,19 +530,24 @@ func Auth() (string, error) {
 	return token, nil
 }
 
-/*func sendString(stringToSend string, token string, url string) error {
+type StringData struct {
+	Data string `json:"data"`
+}
 
-	requestBody := fmt.Sprintf(`{"string": "%s"}`, stringToSend)
+func sendString(data string, url string) error {
+	stringData := StringData{Data: data}
 
-	// Faça a solicitação POST para a segunda API com o token no cabeçalho
-	request, err := http.NewRequest("POST", url, bytes.NewBufferString(requestBody))
+	requestBody, err := json.Marshal(stringData)
 	if err != nil {
 		return err
 	}
-	request.Header.Set("Authorization", "Bearer "+token)
-	request.Header.Set("Content-Type", "application/json")
 
-	// Envie a solicitação
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Content-Type", "application/json") // Define o tipo de conteúdo como JSON
+
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
@@ -549,10 +555,9 @@ func Auth() (string, error) {
 	}
 	defer response.Body.Close()
 
-	// Verifique o código de status da resposta
 	if response.StatusCode == http.StatusOK {
 		return nil
 	} else {
-		return errors.New("request not successful")
+		return errors.New("string not sent")
 	}
-}*/
+}

@@ -6,3 +6,15 @@ key/
 
 # Privacy Enhanced Mail (PEM) Format
 *.pem
+
+# Challenge Files
+challenge/
+
+# Decrypted Files
+decrypted_files/
+
+#Signature Files
+Signature/
+
+# Files
+files/

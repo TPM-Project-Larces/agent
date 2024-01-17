@@ -13,7 +13,9 @@ func encryptionRoutes(router *gin.Engine, basePath string, pathResource string) 
 		encryption.POST("/upload_file", handler.UploadFile)
 		encryption.POST("/upload_encrypted_file", handler.UploadEncryptedFile)
 		encryption.POST("/decrypt_file", handler.DecryptFile)
-		encryption.POST("/decrypt_saved_file", handler.DecryptServerFile)
+		encryption.POST("/save_file", handler.SaveFile)
+		encryption.POST("/size_and_decrypt", handler.SizeAndDecrypt)
+		//encryption.POST("/decrypt_saved_file", handler.DecryptServerFile)
 		encryption.POST("/delete_file", handler.DeleteFile)
 	}
 }

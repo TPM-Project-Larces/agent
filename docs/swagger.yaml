@@ -1,5 +1,10 @@
 basePath: /
 definitions:
+  handler.StringData:
+    properties:
+      data:
+        type: string
+    type: object
   model.Address:
     properties:
       city:
@@ -52,7 +57,6 @@ definitions:
   schemas.EncryptedFileResponse:
     properties:
       createdAt:
-        description: AnonymizedFile AnonymizedFile     `bson:"anonymized_file"`
         type: string
       data:
         items:
@@ -165,7 +169,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new user
+      description: Login a user
       parameters:
       - description: Request body
         in: body
@@ -188,20 +192,20 @@ paths:
           description: internal_server_error
           schema:
             type: string
-      summary: Create user
+      summary: Login user
       tags:
       - Auth
   /encryption/decrypt_file:
     post:
       consumes:
       - multipart/form-data
-      description: Decrypt a file
+      description: Search for a file to decrypt
       parameters:
-      - description: File
-        in: formData
-        name: file
+      - description: Filename
+        in: query
+        name: filename
         required: true
-        type: file
+        type: string
       produces:
       - application/json
       responses:
@@ -220,15 +224,70 @@ paths:
       summary: Decrypt file
       tags:
       - Encryption
-  /encryption/decrypt_saved_file:
+  /encryption/generate_keys:
     post:
-      description: Decrypt a file stored in server
+      consumes:
+      - application/json
+      description: Generate a pair of keys
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: keys_generated
+          schema:
+            type: string
+        "500":
+          description: internal_server_rror
+          schema:
+            type: string
+      summary: Generate keys
+      tags:
+      - Encryption
+  /encryption/save_file:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Save file
       parameters:
       - description: File
         in: formData
         name: file
         required: true
         type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: file_saved
+          schema:
+            type: string
+        "400":
+          description: bad_request
+          schema:
+            type: string
+        "404":
+          description: not_found
+          schema:
+            type: string
+        "500":
+          description: internal_server_error
+          schema:
+            type: string
+      summary: Save file
+      tags:
+      - Encryption
+  /encryption/size_and_decrypt:
+    post:
+      consumes:
+      - application/json
+      description: Get size and decrypt
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.StringData'
       produces:
       - application/json
       responses:
@@ -248,26 +307,7 @@ paths:
           description: internal_server_error
           schema:
             type: string
-      summary: Decrypt a file
-      tags:
-      - File
-  /encryption/generate_keys:
-    post:
-      consumes:
-      - application/json
-      description: Generate a pair of keys
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: keys_generated
-          schema:
-            type: string
-        "500":
-          description: internal_server_rror
-          schema:
-            type: string
-      summary: Generate keys
+      summary: Get size and decrypt
       tags:
       - Encryption
   /encryption/upload_encrypted_file:
