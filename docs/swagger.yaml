@@ -80,13 +80,6 @@ definitions:
       message:
         type: string
     type: object
-  schemas.ListUsersResponse:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/schemas.UserResponse'
-        type: array
-    type: object
   schemas.LoginRequest:
     properties:
       email:
@@ -368,25 +361,6 @@ paths:
       summary: Upload file
       tags:
       - Encryption
-  /file:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of all encrypted files
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/schemas.ListFilesResponse'
-        "500":
-          description: internal_server_error
-          schema:
-            type: string
-      summary: Get all encrypted files
-      tags:
-      - File
   /file/by_name:
     get:
       description: Provide the file data
@@ -447,37 +421,6 @@ paths:
       summary: Get encrypted files by username
       tags:
       - File
-  /file/delete_file:
-    post:
-      description: deletes a file
-      parameters:
-      - description: File
-        in: formData
-        name: file
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: file_deleted
-          schema:
-            type: string
-        "400":
-          description: bad_request
-          schema:
-            type: string
-        "404":
-          description: not_found
-          schema:
-            type: string
-        "500":
-          description: internal_server_error
-          schema:
-            type: string
-      summary: Delete file
-      tags:
-      - File
   /user:
     delete:
       description: Delete a user
@@ -497,26 +440,6 @@ paths:
           schema:
             type: string
       summary: Delete user
-      tags:
-      - User
-    get:
-      description: Get all users
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/schemas.ListUsersResponse'
-        "400":
-          description: bad_request
-          schema:
-            type: string
-        "500":
-          description: internal_server_rror
-          schema:
-            type: string
-      summary: Get all users
       tags:
       - User
     post:

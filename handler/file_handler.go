@@ -2,38 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"io"
-	"os"
-	"path/filepath"
 )
-
-// @BasePath /
-// @Summary Get all encrypted files
-// @Description Get a list of all encrypted files
-// @Tags File
-// @Accept json
-// @Produce json
-// @Success 200 {object} schemas.ListFilesResponse
-// @Failure 500 {string} string "internal_server_error"
-// @Router /file [get]
-func GetFiles(ctx *gin.Context) {
-	ctx.Request.ParseMultipartForm(10 << 20)
-
-	token, err := Auth()
-	if err != nil {
-		response(ctx, 500, "internal_server_error", nil)
-		return
-	}
-
-	url := "http://localhost:5000/file"
-	files, err := sendGetFileRequestByUsername(token, url)
-	if err != nil {
-		response(ctx, 500, "files_not_get", nil)
-		return
-	}
-
-	ctx.JSON(200, gin.H{"message": "all_files", "files": files})
-}
 
 // @BasePath /
 // @Summary Get encrypted files by username
@@ -96,67 +65,4 @@ func GetFileByName(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, gin.H{"message": "all_encrypted_files", "files": files})
-}
-
-// @BasePath /
-// @Summary Delete file
-// @Description deletes a file
-// @Tags File
-// @Produce json
-// @Param file formData file true "File"
-// @Success 200 {string} string "file_deleted"
-// @Failure 400 {string} string "bad_request"
-// @Failure 404 {string} string "not_found"
-// @Failure 500 {string} string "internal_server_error"
-// @Router /file/delete_file [post]
-func DeleteFile(ctx *gin.Context) {
-
-	ctx.Request.ParseMultipartForm(10 << 20)
-
-	file, err := ctx.FormFile("file")
-	if err != nil {
-		response(ctx, 400, "bad_request", err)
-		return
-	}
-
-	tempDir := "./files"
-	if err := os.MkdirAll(tempDir, os.ModePerm); err != nil {
-		response(ctx, 500, "internal_server_error", err)
-		return
-	}
-
-	tempFilePath := filepath.Join(tempDir, file.Filename)
-	tempFile, err := os.Create(tempFilePath)
-	if err != nil {
-		response(ctx, 500, "internal_server_error", err)
-		return
-	}
-	defer tempFile.Close()
-
-	uploadedFile, err := file.Open()
-	if err != nil {
-		response(ctx, 500, "internal_server_error", err)
-		return
-	}
-	defer uploadedFile.Close()
-
-	_, err = io.Copy(tempFile, uploadedFile)
-	if err != nil {
-		response(ctx, 500, "internal_server_error", err)
-		return
-	}
-
-	token, err := Auth()
-	if err != nil {
-		response(ctx, 500, "internal_server_error", nil)
-		return
-	}
-
-	url := "http://localhost:5000/file/" + file.Filename
-	if err := sendFileDeleteRequest(tempFilePath, token, url); err != nil {
-		response(ctx, 500, "file_not_deleted", nil)
-		return
-	}
-
-	response(ctx, 200, "file_deleted", nil)
 }

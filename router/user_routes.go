@@ -12,7 +12,6 @@ func userRoutes(router *gin.Engine, basePath string, pathResource string) {
 		user.PUT("", handler.UpdateUser)
 		user.POST("", handler.CreateUser)
 		user.GET("/username", handler.GetUserByUsername)
-		user.GET("", handler.GetUsers)
 		user.DELETE("", handler.DeleteUser)
 	}
 }
