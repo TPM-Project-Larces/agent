@@ -324,53 +324,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/file/by_name": {
-            "get": {
-                "description": "Provide the file data",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "File"
-                ],
-                "summary": "Find file by name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "filename to find",
-                        "name": "filename",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/schemas.ShowFileResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "bad_request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "not_found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "internal_server_error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/file/by_username": {
             "get": {
                 "description": "Get a list of encrypted files by username",
@@ -384,15 +337,6 @@ const docTemplate = `{
                     "File"
                 ],
                 "summary": "Get encrypted files by username",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Username",
-                        "name": "username",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -548,15 +492,6 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "Find user by username",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "User` + "`" + `s username to find",
-                        "name": "username",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -718,17 +653,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "schemas.ShowFileResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/schemas.EncryptedFileResponse"
-                },
-                "message": {
                     "type": "string"
                 }
             }

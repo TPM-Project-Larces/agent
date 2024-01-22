@@ -107,7 +107,6 @@ func UpdateUser(ctx *gin.Context) {
 // @Description Provide the user data
 // @Tags User
 // @Produce json
-// @Param username query string true "User`s username to find"
 // @Success 200 {object} schemas.ShowUserResponse
 // @Failure 400 {string} string "bad_request"
 // @Failure 404 {string} string "not_found"
@@ -116,15 +115,13 @@ func UpdateUser(ctx *gin.Context) {
 func GetUserByUsername(ctx *gin.Context) {
 	ctx.Request.ParseMultipartForm(10 << 20)
 
-	username := ctx.Query("username")
-
 	token, err := Auth()
 	if err != nil {
 		response(ctx, 500, "internal_server_error", nil)
 		return
 	}
 
-	url := "http://localhost:5000/user/username?username=" + username
+	url := "http://localhost:5000/user/username"
 	user, err := sendGetRequestForUser(token, url)
 	if err != nil {
 		response(ctx, 500, "user_not_found", nil)

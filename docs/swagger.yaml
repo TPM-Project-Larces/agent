@@ -87,13 +87,6 @@ definitions:
       password:
         type: string
     type: object
-  schemas.ShowFileResponse:
-    properties:
-      data:
-        $ref: '#/definitions/schemas.EncryptedFileResponse'
-      message:
-        type: string
-    type: object
   schemas.ShowUserResponse:
     properties:
       data:
@@ -361,48 +354,11 @@ paths:
       summary: Upload file
       tags:
       - Encryption
-  /file/by_name:
-    get:
-      description: Provide the file data
-      parameters:
-      - description: filename to find
-        in: query
-        name: filename
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/schemas.ShowFileResponse'
-        "400":
-          description: bad_request
-          schema:
-            type: string
-        "404":
-          description: not_found
-          schema:
-            type: string
-        "500":
-          description: internal_server_error
-          schema:
-            type: string
-      summary: Find file by name
-      tags:
-      - File
   /file/by_username:
     get:
       consumes:
       - application/json
       description: Get a list of encrypted files by username
-      parameters:
-      - description: Username
-        in: query
-        name: username
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -505,12 +461,6 @@ paths:
   /user/username:
     get:
       description: Provide the user data
-      parameters:
-      - description: User`s username to find
-        in: query
-        name: username
-        required: true
-        type: string
       produces:
       - application/json
       responses:

@@ -10,6 +10,5 @@ func fileRoutes(router *gin.Engine, basePath string, pathResource string) {
 	file := router.Group(basePath + pathResource)
 	{
 		file.GET("/by_username", handler.GetFilesByUsername)
-		file.GET("/by_name", handler.GetFileByName)
 	}
 }
