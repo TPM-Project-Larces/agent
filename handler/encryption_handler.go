@@ -263,7 +263,13 @@ func DecryptFile(ctx *gin.Context) {
 	filename := ctx.Query("filename")
 	url := "http://localhost:5000/encryption/search_file"
 
-	err := sendString(filename, url)
+	token, err := Auth()
+	if err != nil {
+		response(ctx, 500, "internal_server_error", nil)
+		return
+	}
+
+	err = sendString(filename, token, url)
 	if err != nil {
 		response(ctx, http.StatusInternalServerError, "Error sending filename", err)
 		return

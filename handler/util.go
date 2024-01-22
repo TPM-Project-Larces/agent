@@ -534,7 +534,7 @@ type StringData struct {
 	Data string `json:"data"`
 }
 
-func sendString(data string, url string) error {
+func sendString(data string, token string, url string) error {
 	stringData := StringData{Data: data}
 
 	requestBody, err := json.Marshal(stringData)
@@ -547,7 +547,7 @@ func sendString(data string, url string) error {
 		return err
 	}
 	request.Header.Set("Content-Type", "application/json") // Define o tipo de conteúdo como JSON
-
+	request.Header.Set("Authorization", "Bearer "+token)
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {

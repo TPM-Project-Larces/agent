@@ -14,3 +14,7 @@ type EncryptedFile struct {
 	LocallyEncrypted bool               `bson:"locally_encrypted"`
 	CreatedAt        time.Time          `bson:"created_at"`
 }
+
+type StringData struct {
+	Data string `json:"data"`
+}
